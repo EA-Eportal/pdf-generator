@@ -26,23 +26,33 @@ const generatePDFFromHTML = async (htmlContent) => {
 };
 
 app.get('/generatePDF', async (req, res) => {
-  if (req.headers.auth_token === 'EAI-PDF-Generate') {
-    // const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Replace this with your HTML content
-    // const htmlContent = req.query.link; // Replace this with your HTML content
-    // console.log(req.query.link, 'url');
+    const authToken = req.headers.auth_token;
+    if (authToken !== 'EAI-PDF-Generate') {
+      return res.status(401).send('Access Denied');
+    }
+  
+    const url = req.query.link;
+    
     try {
-      const response    = await fetch(req.query.link); // Fetch HTML content from the provided URL
-      const htmlContent = await response.text(); // Extract HTML content from the response
-      const pdfBase64   = await generatePDFFromHTML(htmlContent);
+      const { default: fetch } = await import('node-fetch');
+      const response = await fetch(url);
+      const htmlContent = await response.text();
+  
+      const browser = await chromium.launch({ headless: true });
+      const page = await browser.newPage();
+      
+      await page.setContent(htmlContent);
+      const pdfBuffer = await page.pdf();
+      const pdfBase64 = pdfBuffer.toString('base64');
+  
+      await browser.close();
       res.send(pdfBase64);
     } catch (error) {
       console.error('Internal Server Error:', error);
       res.status(500).send('Internal Server Error');
     }
-  } else {
-    res.status(401).send('Access Denied');
-  }
-});
+  });
+  
 
 app.get('/health', async (req, res) => {
   if (req.headers.auth_token === 'EAI-PDF-Generate') {
