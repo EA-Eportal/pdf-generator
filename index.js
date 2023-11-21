@@ -43,7 +43,7 @@ app.get('/generatePDF', async (req, res) => {
         });
   
         response.on('end', async () => {
-            console.log(htmlData, 'htmlData');
+            // console.log(htmlData, 'htmlData');
           try {
             const pdfBase64 = await generatePDFFromHTML(htmlData);
             res.send(pdfBase64);
