@@ -38,8 +38,8 @@ app.get('/generatePDF', async (req, res) => {
         console.log(url, "url");
         try {
             console.log(url, "in try");
-            const res = await finalPdf(url, req.query.name, res);
-            console.log('generate res', res);
+            const generate_res = await finalPdf(url, req.query.name, res);
+            console.log('generate res', generate_res);
         } catch (error) {
             console.log('error', error);
             res.status(500).send('Internal Server Error');
