@@ -30,7 +30,7 @@ app.get('/generatePDF', async (req, res) => {
     // const url = req.query.link;
     const url = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
     console.log(url, 'url');
-    const htmlContent = decodeURIComponent(req.query.link); 
+    const htmlContent = decodeURIComponent(url); 
     console.log(htmlContent, 'htmlContent');
 
     try {
