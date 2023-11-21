@@ -27,7 +27,8 @@ const generatePDFFromHTML = async (htmlContent) => {
 app.get('/generatePDF', async (req, res) => {
   if (req.headers.auth_token === 'EAI-PDF-Generate') {
     // const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Sample html
-    const url = req.query.link;
+    // const url = req.query.link;
+    const url = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
     console.log(url, 'url');
     const htmlContent = decodeURIComponent(req.query.link); 
     console.log(htmlContent, 'htmlContent');
