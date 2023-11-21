@@ -26,6 +26,7 @@ let finalPdf = async (link, name, res) => {
         console.error('Error generating PDF:', err);
         throw err;
     } finally {
+        console.error('final:');
         await browser.close();
     }
 }
