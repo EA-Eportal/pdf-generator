@@ -5,10 +5,10 @@ const port = 3000;
 const host = '0.0.0.0';
 
 const generatePDFFromHTML = async (htmlContent) => {
-  const browser = await puppeteer.launch({
-    headless: true, // Run Puppeteer in headless mode
-    // Other configurations...
-  });
+    const browser = await puppeteer.launch({
+        headless: 'new', // Opt-in to the new headless mode
+        // Other configurations...
+    });
   const page = await browser.newPage();
 
   try {
