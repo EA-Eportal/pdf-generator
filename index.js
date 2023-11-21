@@ -31,8 +31,8 @@ app.get('/generatePDF', async (req, res) => {
       return res.status(401).send('Access Denied');
     }
   
-    // const url = req.query.link;
-    const url = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
+    const url = req.query.link;
+    // const url = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
     console.log(url, 'url');
     try {
       https.get(url, (response) => {
