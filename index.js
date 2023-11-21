@@ -1,6 +1,6 @@
 const express = require('express');
 const { chromium } = require('playwright');
-const axios = require('axios');
+const https = require('https');
 const app = express();
 const port = 3000;
 const host = '0.0.0.0';
@@ -26,28 +26,41 @@ const generatePDFFromHTML = async (htmlContent) => {
 };
 
 app.get('/generatePDF', async (req, res) => {
-  if (req.headers.auth_token === 'EAI-PDF-Generate') {
-    // const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Sample html
+    const authToken = req.headers.auth_token;
+    if (authToken !== 'EAI-PDF-Generate') {
+      return res.status(401).send('Access Denied');
+    }
+  
     // const url = req.query.link;
     const url = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
     console.log(url, 'url');
-    const response = await axios.get(url);
-    const htmlContent = await response.text();
-
-    console.log(htmlContent, 'htmlContent');
-
     try {
-      const pdfBase64 = await generatePDFFromHTML(htmlContent);
-      res.send(pdfBase64);
+      https.get(url, (response) => {
+        let htmlData = '';
+  
+        response.on('data', (chunk) => {
+          htmlData += chunk;
+        });
+  
+        response.on('end', async () => {
+            console.log(htmlData, 'htmlData');
+          try {
+            const pdfBase64 = await generatePDFFromHTML(htmlData);
+            res.send(pdfBase64);
+          } catch (error) {
+            console.error('Error generating PDF:', error);
+            res.status(500).send('Error generating PDF');
+          }
+        });
+      }).on('error', (error) => {
+        console.error('Error fetching HTML:', error);
+        res.status(500).send('Error fetching HTML');
+      });
     } catch (error) {
       console.error('Internal Server Error:', error);
       res.status(500).send('Internal Server Error');
     }
-  } else {
-    res.status(401).send('Access Denied');
-  }
-});
-
+  });
 app.get('/health', async (req, res) => {
   if (req.headers.auth_token === 'EAI-PDF-Generate') {
     const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Replace this with your HTML content
