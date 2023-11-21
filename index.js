@@ -26,8 +26,25 @@ const generatePDFFromHTML = async (htmlContent) => {
 
 app.get('/generatePDF', async (req, res) => {
   if (req.headers.auth_token === 'EAI-PDF-Generate') {
-    const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Replace this with your HTML content
+    // const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Replace this with your HTML content
+    const htmlContent = req.query.link; // Replace this with your HTML content
 
+    try {
+      const pdfBase64 = await generatePDFFromHTML(htmlContent);
+      res.send(pdfBase64);
+    } catch (error) {
+      console.error('Internal Server Error:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  } else {
+    res.status(401).send('Access Denied');
+  }
+});
+
+app.get('/health', async (req, res) => {
+  if (req.headers.auth_token === 'EAI-PDF-Generate') {
+    const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Replace this with your HTML content
+    
     try {
       const pdfBase64 = await generatePDFFromHTML(htmlContent);
       res.send(pdfBase64);
