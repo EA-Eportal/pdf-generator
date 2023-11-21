@@ -5,7 +5,10 @@ const port = 3000;
 const host = '0.0.0.0';
  
 let finalPdf = async (link, name, res) => {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        headless: 'new', // Opt-in to the new headless mode
+        // Other configurations...
+    });
     const page = await browser.newPage();
  
     try {
