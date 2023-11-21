@@ -10,12 +10,17 @@ let finalPdf = async (link, name, res) => {
         // Other configurations...
     });
     const page = await browser.newPage();
- 
+    console.log('in final pdf----');
     try {
+        console.log('in try----');
         await page.goto(link, { waitUntil: 'networkidle0' });
+        console.log('page----');
         const pdfBuffer = await page.pdf();
+        console.log(pdfBuffer, 'pdfBuffer----');
         const pdfBase64 = pdfBuffer.toString('base64');
+        console.log(pdfBase64, 'pdfBase64----');
         console.log("PDF Base64:", pdfBase64);
+        console.log(pdfBase64, 'pdfBase64----');
         res.send(pdfBase64);
     } catch (err) {
         console.error('Error generating PDF:', err);
