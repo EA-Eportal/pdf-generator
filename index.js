@@ -1,18 +1,18 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
+const { chromium } = require('playwright');
 const app = express();
 const port = 3000;
 const host = '0.0.0.0';
 
 const generatePDFFromHTML = async (htmlContent) => {
-    const browser = await puppeteer.launch({
-        headless: 'new', // Opt-in to the new headless mode
-        // Other configurations...
-    });
+  const browser = await chromium.launch({
+    headless: true, // Run Playwright in headless mode
+    // Other configurations...
+  });
   const page = await browser.newPage();
 
   try {
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    await page.setContent(htmlContent);
     const pdfBuffer = await page.pdf();
     return pdfBuffer.toString('base64');
   } catch (err) {
