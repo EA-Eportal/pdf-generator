@@ -1,5 +1,6 @@
 const express = require('express');
 const { chromium } = require('playwright');
+const fetch = require('node-fetch'); //Import 'node-fetch' for making HTTP requests
 const app = express();
 const port = 3000;
 const host = '0.0.0.0';
@@ -27,11 +28,12 @@ const generatePDFFromHTML = async (htmlContent) => {
 app.get('/generatePDF', async (req, res) => {
   if (req.headers.auth_token === 'EAI-PDF-Generate') {
     // const htmlContent = '<html><body><h1>Hello, PDF!</h1></body></html>'; // Replace this with your HTML content
-    const htmlContent = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227'; // Replace this with your HTML content
     // const htmlContent = req.query.link; // Replace this with your HTML content
-    console.log(req.query.link, 'url');
+    // console.log(req.query.link, 'url');
     try {
-      const pdfBase64 = await generatePDFFromHTML(htmlContent);
+      const response    = await fetch(req.query.link); // Fetch HTML content from the provided URL
+      const htmlContent = await response.text(); // Extract HTML content from the response
+      const pdfBase64   = await generatePDFFromHTML(htmlContent);
       res.send(pdfBase64);
     } catch (error) {
       console.error('Internal Server Error:', error);
