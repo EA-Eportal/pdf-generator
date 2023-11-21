@@ -1,5 +1,6 @@
 const express = require('express');
 const { chromium } = require('playwright');
+const axios = require('axios');
 const app = express();
 const port = 3000;
 const host = '0.0.0.0';
@@ -30,7 +31,9 @@ app.get('/generatePDF', async (req, res) => {
     // const url = req.query.link;
     const url = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
     console.log(url, 'url');
-    const htmlContent = decodeURIComponent(url); 
+    const response = await axios.get(url);
+    const htmlContent = await response.text();
+
     console.log(htmlContent, 'htmlContent');
 
     try {
