@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const app = express()
 const port = 3000;
 const host = '0.0.0.0';
- 
+
 let finalPdf = async (link, name, res) => {
     const browser = await puppeteer.launch({
         headless: 'new', // Opt-in to the new headless mode
@@ -30,15 +30,18 @@ let finalPdf = async (link, name, res) => {
         await browser.close();
     }
 }
- 
+
 app.get('/generatePDF', async (req, res) => {
     if (req.headers.auth_token == 'EAI-PDF-Generate') {
         req.query.link = 'https://uat-e-portal.europ-assistance.in/admin/certificate-pdf?car_id=&prdID=0&subscription_id=3739227';
         let url = decodeURIComponent(req.query.link);
         console.log(url, "url");
         try {
-            await finalPdf(url, req.query.name, res);
+            console.log(url, "in try");
+            const res = await finalPdf(url, req.query.name, res);
+            console.log('generate res', res);
         } catch (error) {
+            console.log('error', error);
             res.status(500).send('Internal Server Error');
         }
     } else {
@@ -46,5 +49,5 @@ app.get('/generatePDF', async (req, res) => {
         res.status(401).send("Access Denied");
     }
 });
- 
+
 app.listen(port, host, () => console.log(`PDF Generator app listening on port ${port}!`));
