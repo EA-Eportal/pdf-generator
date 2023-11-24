@@ -1,16 +1,15 @@
 import express, { Request, Response } from 'express';
-import { chromium } from 'playwright';
-import https from 'https';
+import { chromium, Browser, Page } from 'playwright';
+const ejs = require("ejs");
 
 const app = express();
 const port = 3000;
 const host = '0.0.0.0';
 
+let browser: Browser;
+
 const generatePDFFromHTML = async (htmlContent: string): Promise<string> => {
-  const browser = await chromium.launch({
-    headless: true,
-  });
-  const page = await browser.newPage();
+  const page: Page = await browser.newPage();
 
   try {
     await page.setContent(htmlContent);
@@ -20,10 +19,15 @@ const generatePDFFromHTML = async (htmlContent: string): Promise<string> => {
     console.error('Error generating PDF:', err);
     throw err;
   } finally {
-    console.log('Closing browser...');
-    await browser.close();
+    console.log('Closing page...');
+    await page.close();
   }
 };
+
+const ejsProceessor = (ejsContent: string, templateValues: any) =>{
+  const htmlTemplate = ejs.render(ejsContent.toString(), templateValues);
+  return htmlTemplate;
+}
 
 app.get('/generatePDF', async (req: Request, res: Response) => {
   const authToken = req.headers.auth_token as string;
@@ -34,29 +38,16 @@ app.get('/generatePDF', async (req: Request, res: Response) => {
   const url = req.query.link as string;
 
   try {
-    https.get(url, (response) => {
-      let htmlData = '';
+    const page = await browser.newPage();
+    await page.goto(url,  { waitUntil: 'networkidle' });
 
-      response.on('data', (chunk) => {
-        htmlData += chunk;
-      });
+    const htmlContent = await page.content();
+    const pdfBase64 = await generatePDFFromHTML(htmlContent);
 
-      response.on('end', async () => {
-        try {
-          const pdfBase64 = await generatePDFFromHTML(htmlData);
-          res.send(pdfBase64);
-        } catch (error) {
-          console.error('Error generating PDF:', error);
-          res.status(500).send('Error generating PDF');
-        }
-      });
-    }).on('error', (error) => {
-      console.error('Error fetching HTML:', error);
-      res.status(500).send('Error fetching HTML');
-    });
+    res.send(pdfBase64);
   } catch (error) {
-    console.error('Internal Server Error:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('Error generating PDF:', error);
+    res.status(500).send('Error generating PDF');
   }
 });
 
@@ -76,6 +67,13 @@ app.get('/health', async (req: Request, res: Response) => {
   }
 });
 
-app.listen(port, host, () => {
-  console.log(`PDF Generator app listening on port ${port}!`);
-});
+// Launch the browser when the server starts
+(async () => {
+  browser = await chromium.launch({
+    headless: true,
+  });
+
+  app.listen(port, host, () => {
+    console.log(`PDF Generator app listening on port ${port}!`);
+  });
+})();
