@@ -24,9 +24,21 @@ const generatePDFFromHTML = async (htmlContent: string): Promise<string> => {
   }
 };
 
-const ejsProceessor = (ejsContent: string, templateValues: any) =>{
-  const htmlTemplate = ejs.render(ejsContent.toString(), templateValues);
-  return htmlTemplate;
+// const ejsProceessor = async (ejsContent: string, templateValues: any) =>{
+//   const htmlTemplate = await ejs.render(ejsContent.toString(), templateValues);
+//   return htmlTemplate;
+// }
+
+const valueProceessor = async (htmlContent: string, templateValues: any) =>{
+  const variables = Object.keys(templateValues);
+  for (const variable of variables) {
+    const data = templateValues[variable];
+    const regex = new RegExp(`{{${variable}}}`, 'g');
+    htmlContent = htmlContent.replace(regex, data);
+  }
+
+  return htmlContent;
+ 
 }
 
 app.get('/generatePDF', async (req: Request, res: Response) => {
@@ -36,13 +48,16 @@ app.get('/generatePDF', async (req: Request, res: Response) => {
   }
 
   const url = req.query.link as string;
+  const dynamicDataObj = req.query.data  ? req.query.data : null;
 
   try {
     const page = await browser.newPage();
     await page.goto(url,  { waitUntil: 'networkidle' });
 
     const htmlContent = await page.content();
-    const pdfBase64 = await generatePDFFromHTML(htmlContent);
+
+    const finalHtmlContent = dynamicDataObj ? await valueProceessor(htmlContent, dynamicDataObj): htmlContent;
+    const pdfBase64 = await generatePDFFromHTML(finalHtmlContent);
 
     res.send(pdfBase64);
   } catch (error) {
