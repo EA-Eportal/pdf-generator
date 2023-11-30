@@ -36,6 +36,7 @@ const valueProceessor = async (htmlContent: string, templateValues: any) =>{
     const regex = new RegExp(`{{${variable}}}`, 'g');
     htmlContent = htmlContent.replace(regex, data);
   }
+  console.log("new content", htmlContent);
 
   return htmlContent;
  
