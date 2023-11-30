@@ -56,6 +56,8 @@ app.get('/generatePDF', async (req: Request, res: Response) => {
 
     const htmlContent = await page.content();
 
+    console.log("dynamic Value", dynamicDataObj);
+
     const finalHtmlContent = dynamicDataObj ? await valueProceessor(htmlContent, dynamicDataObj): htmlContent;
     const pdfBase64 = await generatePDFFromHTML(finalHtmlContent);
 
