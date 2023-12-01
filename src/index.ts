@@ -88,6 +88,7 @@ app.get('/generatePDF', async (req: Request, res: Response) => {
   const url = req.query.link as string;
   const dynamicDataObj = req.query.data  ? req.query.data : null;
   const clientConfig = req.query.clientConfig  ? req.query.clientConfig : null;
+  console.log(clientConfig, "client config")
 
   try {
     const page = await browser.newPage();
@@ -96,7 +97,7 @@ app.get('/generatePDF', async (req: Request, res: Response) => {
     let htmlContent = await page.content();
 
     console.log("dynamic Value", dynamicDataObj);
-    htmlContent = changesAsPerConfig(htmlContent, clientConfig);
+    htmlContent = clientConfig ? changesAsPerConfig(htmlContent, clientConfig) : htmlContent;
     const finalHtmlContent = dynamicDataObj ? await valueProceessor(htmlContent, dynamicDataObj): htmlContent;
     const pdfBase64 = await generatePDFFromHTML(finalHtmlContent);
 
