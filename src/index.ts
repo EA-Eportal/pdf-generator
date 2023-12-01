@@ -39,44 +39,44 @@ const valueProceessor = async (htmlContent: string, templateValues: any) =>{
   console.log("new content", htmlContent);
 
   return htmlContent;
- 
+
 }
 
-const changesAsPerConfig = (htmlContent: string, clientConfig:any) =>{
+const changesAsPerConfig = (htmlContent: string, clientConfig: any) => {
   const isMRPOnCertificate = clientConfig.filter((client: any) => client.name === "MRP_ON_CERTIFICATE");
   const isClientLogoOnCertificate = clientConfig.filter((client: any) => client.name === "CLIENT_LOGO_ON_CERTIFICATE");
   const isClientCertificateTC = clientConfig.filter((client: any) => client.name === "CERTIFICATE_TC");
   const isClientIntro = clientConfig.filter((client: any) => client.name === "CERTIFICATE_INTRODUCTION");
   const isQRInCertificate = clientConfig.filter((client: any) => client.name === "QR_CODE_ON_CERTIFICATE");
   const isHSNCodeAvailable = clientConfig.filter((client: any) => client.name === "HSN_CODE_ON_INVOIC");
-            //isMRP
-            if(isMRPOnCertificate.length === 0){
-              htmlContent = htmlContent.replace(`<th>MRP</th>`, "").replace("<td>Rs. {{MRP}}/-</td>", "");
-            }
-            //isClientLogo
-            if(isClientLogoOnCertificate.length === 0){
-              htmlContent = htmlContent.replace(`<img src="https://ik.imagekit.io/gqj3d4vec/images/rectangle_419.png?updatedAt=1700817803223" alt="Right Image">`, "");
-            }
-            //isClientCertificateTC
-            if(isClientCertificateTC.length){
-              htmlContent = htmlContent.replace(`{{REPLACE_TC}}`, isClientCertificateTC[0].key )
-            }else{
-              htmlContent = htmlContent.replace(`{{REPLACE_TC}}`, "" )
-            }
-            if(isClientIntro.length){
-              htmlContent = htmlContent.replace(`{{INTRO}}`, isClientIntro[0].key )
-            }else{
-              htmlContent = htmlContent.replace(`{{INTRO}}`, "" )
-            }
-            if(isQRInCertificate.length){
-              htmlContent = !isQRInCertificate[0].is_active ? htmlContent.replace(`<p>Scan this QR Code for RSA Breakdown Assistance</p><!-- Add your QR Code image here --><img src="https://ik.imagekit.io/gqj3d4vec/images/RSA_QR.png?updatedAt=1700817804551" alt="QR Code" class="img-fluid" style="width: 150px; height: 150px;">`, "") : htmlContent;
-            }
-  
-            if(isHSNCodeAvailable.length === 0){
-              htmlContent = htmlContent.replace(` <th>HSN Code</th>`, "").replace("<td>{{HSN_CODE}}</td>", "")
-            }
+  //isMRP
+  if (isMRPOnCertificate.length === 0) {
+    htmlContent = htmlContent.replace(`<th>MRP</th>`, "").replace("<td>Rs. {{MRP}}/-</td>", "");
+  }
+  //isClientLogo
+  if (isClientLogoOnCertificate.length === 0) {
+    htmlContent = htmlContent.replace(`<img src="https://ik.imagekit.io/gqj3d4vec/images/rectangle_419.png?updatedAt=1700817803223" alt="Right Image">`, "");
+  }
+  //isClientCertificateTC
+  if (isClientCertificateTC.length) {
+    htmlContent = htmlContent.replace(`{{REPLACE_TC}}`, isClientCertificateTC[0].key)
+  } else {
+    htmlContent = htmlContent.replace(`{{REPLACE_TC}}`, "")
+  }
+  if (isClientIntro.length) {
+    htmlContent = htmlContent.replace(`{{INTRO}}`, isClientIntro[0].key)
+  } else {
+    htmlContent = htmlContent.replace(`{{INTRO}}`, "")
+  }
+  if (isQRInCertificate.length) {
+    htmlContent = !isQRInCertificate[0].is_active ? htmlContent.replace(`<p>Scan this QR Code for RSA Breakdown Assistance</p><!-- Add your QR Code image here --><img src="https://ik.imagekit.io/gqj3d4vec/images/RSA_QR.png?updatedAt=1700817804551" alt="QR Code" class="img-fluid" style="width: 150px; height: 150px;">`, "") : htmlContent;
+  }
 
-            return htmlContent
+  if (isHSNCodeAvailable.length === 0) {
+    htmlContent = htmlContent.replace(` <th>HSN Code</th>`, "").replace("<td>{{HSN_CODE}}</td>", "")
+  }
+
+  return htmlContent
 }
 
 app.get('/generatePDF', async (req: Request, res: Response) => {
@@ -86,19 +86,19 @@ app.get('/generatePDF', async (req: Request, res: Response) => {
   }
 
   const url = req.query.link as string;
-  const dynamicDataObj = req.query.data  ? req.query.data : null;
-  const clientConfig = req.query.clientConfig  ? req.query.clientConfig : null;
+  const dynamicDataObj = req.query.data ? req.query.data : null;
+  const clientConfig = req.query.clientConfig ? req.query.clientConfig : null;
   console.log(clientConfig, "client config")
 
   try {
     const page = await browser.newPage();
-    await page.goto(url,  { waitUntil: 'networkidle' });
+    await page.goto(url, { waitUntil: 'networkidle' });
 
     let htmlContent = await page.content();
 
     console.log("dynamic Value", dynamicDataObj);
-    htmlContent = clientConfig ? changesAsPerConfig(htmlContent, clientConfig) : htmlContent;
-    const finalHtmlContent = dynamicDataObj ? await valueProceessor(htmlContent, dynamicDataObj): htmlContent;
+    // htmlContent = clientConfig ? changesAsPerConfig(htmlContent, clientConfig) : htmlContent;
+    const finalHtmlContent = dynamicDataObj ? await valueProceessor(htmlContent, dynamicDataObj) : htmlContent;
     const pdfBase64 = await generatePDFFromHTML(finalHtmlContent);
 
     res.send(pdfBase64);
